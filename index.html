@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <title>Editor de Ranking de Animes</title>
-  <!-- Importação da fonte Roboto via Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
@@ -207,7 +206,7 @@
   <div class="modal-overlay" id="resetModal">
     <div class="modal">
       <h3>Confirmar Reset</h3>
-      <p>Tem certeza de que deseja apagar todas as modificações? As alterações salvas serão perdidas.</p>
+      <p>Tem certeza de que deseja apagar todas as modificações? As alterações salvas serão perdidas para todos os usuários.</p>
       <div class="modal-buttons">
         <button class="btn-danger" id="btnConfirmReset">Sim, Resetar</button>
         <button class="btn-primary" id="btnCancelReset">Cancelar</button>
@@ -215,7 +214,27 @@
     </div>
   </div>
 
-  <script>
+  <!-- Importação do Firebase Realtime Database -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    // ⚠️ SUBSTITUA PELAS SUAS CHAVES DO FIREBASE CONSOLE
+ const firebaseConfig = {
+    apiKey: "AIzaSyASHz83OXkle3qYipXeXoyFoZq48IM-6V4",
+    authDomain: "brasil-club-ranking.firebaseapp.com",
+    databaseURL: "https://brasil-club-ranking-default-rtdb.firebaseio.com",
+    projectId: "brasil-club-ranking",
+    storageBucket: "brasil-club-ranking.firebasestorage.app",
+    messagingSenderId: "706077611158",
+    appId: "1:706077611158:web:0e04f69c89f5fc42dd1eb7",
+    measurementId: "G-070WTE7272"
+  };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const rankRef = ref(db, 'anime_rank_shared_state');
+
     const PRESET_IMAGES = [
       'data:image/png;base64,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',
       'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHsAAAB7CAYAAABUx/9/AAAJjElEQVR4nO1di3abOBCVsB07bdp09/8/Yr+sbZo28RPtuQOKQRZPI5A6c8/JqesYA7qah2auiH79LzNKwAKZ0MwHQjYjCNmMIGQzgpDNCEI2IwjZjCBkM4KQzQhCNiMI2YwgZDOCkM0IQjYjCNmMIGQzgpDNCEI2IwjZjCBkM4KQzQhCNiMI2YwgZDOCkM0IQjYjCNmMIGQzgpDNCEI2IwjZjJAs2dlKqfVu+NZyHLN6GH6cXim1+ZT2VvZ0yd4YtftqBhGACbL9UhyH132hM6Uen3P18NkorYPdUnAk78a3T/0IB2G7bzmR9fG6B+H02edcZWtFx47xCrEgWbLX2+trIvyxnQRYZdWaycqfOojTirzAalN/L1Wk68bXdaIenhxSqr/75J8M662hSeCFJTphS3aRrht3OICL3X69dc1wv5smQkuL9yV6sHpMBhdDYn1s+KuWXiDisRKL8S8Sq66kCsRWScQEaAoLQnZEyEqC8S/cd98kDJOEjvnc4tppAqXr1tcRXMPkgOv+9G8+KJkiL/BPTsS3fi6qOx2Gv7eCNoKVLqLVbaqQFKRcOhAmT9e2heyByE9JXW4NQvZA5HlSl1tDsmRfTimnSssgXbKPy5zXiGXzQH7BJJMEbXacj5oGf06kbNUq9dq4ucxrZed92nlC0m78tJ/vXMaknxRGTzY6T1lDURfxcy7Xmp+0ys/+36HR0lZPjwXRk42O1O6rv84Nos+Heazt9N78O7RIQXZTPz0WRE02Bg/1aupJe3rLwOlNk4sNCVh006TC9Vmr9vW/Y8KiZHdpuqinXI4xdGa+vjQy8tCJ0/FP8/fjGm0DhUQQDR/FhG0KR3NhUbJXW6MevxU/rijAnQhtgwUyQsVuTKRGq9Z1OTNId63bxnO0XB8WliIvS3ZJHkilwfh8tQwMottybFKPgOj9r+mtG9/bZtW4bneSbnbX1yAePXLr5pfWsy3qWGrar9ICMCCIwz5dGDyBXmllKsUUxHVb2Tq9TSfkB9HvP7PWwk1V4WoBPfvqoSDdvQey/AdDBaFG6HBN82CWXWiz/WI+Vc5yn1gA5O2e/ZktXGLmyIKgMrUEH35rmih3wyh1eG1eatn781kqrvGx7b49E8SOB9SsDx2S6HsQzo2bYhbjBuCiKZGp8IDZPwZVN6lKC0QstJMDhB/vINxadNeSDmT3Uba4cGM6xsjmLZggIVcWwdy4KYseFNfWxbYbuOnTu1anvW5cSg3F5Yyll1HbLzmRRHH2t1aXgyZp8RA1KK4Xk6XNoi3WI+OvTeJA6s3a3IStG4SL2bjwY92C7Zq0aRnVB7Q5AAeXY434jR9MKChELeGXk1Jv3zO12RXnyzK/Lg2DjuoYSq9DlnDZHQUUhCkfkB+ErAgGTdCKdqA/ro0FLcEyVUucULPGJHAJx6mtJ8ExG2dnCOI7XP6oAQ7gbkPXC4IuveAOLyE0W86YnA/X15bwml7cFJMDxNePm6+23gehS7/B19nn94lvwNxaFdxwlTRLuJsta/dPhet4ypuXGfrz4ck+1NfF9+JyvhX9GU9iU2wFat/dERPaijdTITjZIOIw4Y2QbtvDH7loz/u2VInkcErNdzV03AtYdZBw52CWcikSj6m0WxgUWK27h6vID/znsG7d3ebbFzifrctTYWeN801zP1MbQxtmq41j/TpFwQATByVJX6Xp+NZ8HAhCgWcMir3fxbGYZOivU4l2AmtETWCujQezkQ3L27/4XW1fgGgkYqhJ+zpg8B5TZ7SoaqEIYpMnekxHeQo3ux98Pwd993cMwaxdL5Dx/jLSwk2ZxJStz6bvoHbnRDmZLh/FUZUQIxTgfUwACk8jrRJE0+SfEbO3ODFo+xGEUxnzUgxy1bpcwINMYS32CUlFYnd931YE12WNfv+S9SqvVoHrm5totVQ/myz8R3ezQZWNCXSgLIEfAoCWNTKseygBVXxszi9Dha+yhdo46tq2cdLHwjFZ339qup8lsJh4wcZw3DzKmbB0UxZMqlZPbUtL9NNVado6XAZihmxUdUyv6kRT9c2XeeMZLl+KE5B44qU+lNV7sQ2W9+/ZojtKFn/yAq0xj0oddRGPqcdhrk8qQjJ23peiw0oGnpv2QcNkQqa7HZCBW5VotVN2k3VXvg7XhM/Dk3xU64xSb6jNX8p7yVVwQWRfRKMuJcvOr50fuwGAYnTZLavF6R4DCI/Rq7ddqmR8Tz50XfjZ2VBIHbX1tc+O0ISl1Me9RFTAi/aZKkWToiCaSNiMGzVYt8qLx2O5SZ0x+iY+139/W4YtXHpFZKiLjN2uw6esrE2NeHXjlYEmCZND1JAtu7BuSggdK12tTCPRqrTqPs0JcuG6lDXPtGlhDKLeJIDErMkNDt13RTHccemI541abuNfwlFZtiHJin3j3+Jkt+m4MLC+jlnT+93n6h8KKPY2LN981u5z+fVzL/9crcXJRgIGfVpTkcRnXbDqkIlPl17ca/EtG/+Q5Xc+FHcGLE42XJ8V05Py8kaFUicWr+9Rj/YByGyL1b69X77tw9R8eS6y/KYW7JxYPBsHeShIgGwMTH42NJBY21oFCiaEXWMju55SDOEC5+0jJEAVDBp2EGqvERM1K9WjKKvatTe0bnP0q7sQxdILA4HBgzunQkXZd4ZE2GbEphSVhtwQj0l0+NXP2VGxJC+WYbgmlHHXj7cqVkxcVM9iQDTrbLg51JprG+X07f4u/D9UbXn/2l8Hhmu1lmsrfS7g7g8B9qCNRVRLL2zO61q++NbcUwCue0jdujoJm7YSIzzFVEGLbp0NwttalGP/6k8TqKuGLUMDpEG0z6tlRwt19To2BS6BKMulcNMoOyKL9a3D4TLbHnvRF1Q7/zM84bM9dR8wUZdqYXYh2gpaW8/b7h+7F9C0j8nsfZ6FetU/smiJVrE/XL6Ie0jc9IcWzFo69nDdneWSAGLYd2CS2c14tE/sXNGSRS5RT+IvCWBphuUN1tjoXtEWXRA/od6sL2xiBpJhyTElYF1I6qF3VH8uVS1I1OZ+bIV9coIq431KRKsUn3BYbYL41ratcNUtHWoXF7QBf1V0xC4RtzKbkOQfhDm8ZiTpHdpStJU6EGZGiPytbk5rf+crdiRJto3hYzCFsD9VyPPGGUHIZgQhmxGEbEYQshlByGYEIZsRhGxGELIZQchmBCGbEYRsRhCyGUHIZgQhmxGEbEYQshlByGYEIZsRhGxGELIZQchmBCGbEYRsRhCyGUHIZgQhmxGEbC5QSv0PCIwwXbaabl8AAAAASUVORK5CYII=',
@@ -226,7 +245,6 @@
     const CANVAS_WIDTH = 726;
     const CANVAS_HEIGHT = 190;
 
-    // Posições X centralizadas e distribuídas uniformemente (Canvas 726px)
     const SLOTS_CONFIG = [
       { circleX: 95,  circleY: 103, radius: 50, heartX: 68,  heartY: 172 },
       { circleX: 273, circleY: 103, radius: 50, heartX: 246, heartY: 172 },
@@ -252,11 +270,54 @@
     const yearInput = document.getElementById('yearInput');
 
     document.fonts.ready.then(() => {
-      loadStateFromLocalStorage();
       renderControlsUI();
       initEvents();
-      drawCanvas();
+      syncWithFirebase();
     });
+
+    // Escuta alterações globais no Firebase
+    function syncWithFirebase() {
+      onValue(rankRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          state = data;
+          yearInput.value = state.year || '0000';
+          updateInputsUI();
+
+          let pending = state.slots.length;
+          state.slots.forEach((slot, i) => {
+            if (slot.imageSrc) {
+              loadImageForSlot(i, slot.imageSrc, () => {
+                pending--;
+                if (pending === 0) drawCanvas();
+              });
+            } else {
+              loadedImages[i] = null;
+              pending--;
+              if (pending === 0) drawCanvas();
+            }
+          });
+        } else {
+          drawCanvas();
+        }
+      });
+    }
+
+    function saveStateToFirebase() {
+      set(rankRef, state);
+    }
+
+    function updateInputsUI() {
+      state.slots.forEach((slot, i) => {
+        const card = document.querySelectorAll('.control-card')[i + 1];
+        if (card) {
+          card.querySelector('.scale-input').value = slot.scale;
+          card.querySelector('.offset-x-input').value = slot.offsetX;
+          card.querySelector('.offset-y-input').value = slot.offsetY;
+          card.querySelector('.votes-input').value = slot.votes;
+        }
+      });
+    }
 
     function renderControlsUI() {
       const container = document.getElementById('slotsControls');
@@ -294,57 +355,44 @@
     }
 
     function initEvents() {
-      yearInput.addEventListener('input', (e) => {
+      yearInput.addEventListener('change', (e) => {
         state.year = e.target.value;
-        saveStateToLocalStorage();
-        drawCanvas();
+        saveStateToFirebase();
       });
 
       document.getElementById('slotsControls').addEventListener('click', (e) => {
         if (e.target.classList.contains('btn-preset')) {
           const index = parseInt(e.target.dataset.index, 10);
-          const presetSrc = PRESET_IMAGES[index];
-          state.slots[index].imageSrc = presetSrc;
-          loadImageForSlot(index, presetSrc, () => {
-            saveStateToLocalStorage();
-            drawCanvas();
-          });
+          state.slots[index].imageSrc = PRESET_IMAGES[index];
+          saveStateToFirebase();
         }
-      });
-
-      document.getElementById('slotsControls').addEventListener('input', (e) => {
-        const target = e.target;
-        const index = parseInt(target.dataset.index, 10);
-        if (isNaN(index)) return;
-
-        if (target.classList.contains('scale-input')) {
-          state.slots[index].scale = parseFloat(target.value);
-        } else if (target.classList.contains('offset-x-input')) {
-          state.slots[index].offsetX = parseInt(target.value, 10);
-        } else if (target.classList.contains('offset-y-input')) {
-          state.slots[index].offsetY = parseInt(target.value, 10);
-        } else if (target.classList.contains('votes-input')) {
-          state.slots[index].votes = target.value;
-        }
-
-        saveStateToLocalStorage();
-        drawCanvas();
       });
 
       document.getElementById('slotsControls').addEventListener('change', (e) => {
         const target = e.target;
+        const index = parseInt(target.dataset.index, 10);
+        if (isNaN(index)) return;
+
+        if (target.classList.contains('scale-input') ||
+            target.classList.contains('offset-x-input') ||
+            target.classList.contains('offset-y-input') ||
+            target.classList.contains('votes-input')) {
+          
+          if (target.classList.contains('scale-input')) state.slots[index].scale = parseFloat(target.value);
+          if (target.classList.contains('offset-x-input')) state.slots[index].offsetX = parseInt(target.value, 10);
+          if (target.classList.contains('offset-y-input')) state.slots[index].offsetY = parseInt(target.value, 10);
+          if (target.classList.contains('votes-input')) state.slots[index].votes = target.value;
+
+          saveStateToFirebase();
+        }
+
         if (target.classList.contains('img-input')) {
-          const index = parseInt(target.dataset.index, 10);
           const file = target.files[0];
           if (file) {
             const reader = new FileReader();
             reader.onload = function(evt) {
-              const base64Img = evt.target.result;
-              state.slots[index].imageSrc = base64Img;
-              loadImageForSlot(index, base64Img, () => {
-                saveStateToLocalStorage();
-                drawCanvas();
-              });
+              state.slots[index].imageSrc = evt.target.result;
+              saveStateToFirebase();
             };
             reader.readAsDataURL(file);
           }
@@ -382,11 +430,9 @@
       ctx.shadowOffsetX = 0;
       ctx.shadowOffsetY = 0;
 
-      // 1. Fundo Amarelo Principal
       ctx.fillStyle = '#ffc600';
       ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-      // 2. Centralização do Bloco do Título + Faixa do Ano
       ctx.save();
       ctx.font = '900 22px "Roboto", sans-serif';
       
@@ -398,14 +444,10 @@
       const rectWidth = 38;
       const rectHeight = 18;
 
-      // Largura total ocupada pelo conjunto (Texto + Espaço + Caixa do Ano)
       const totalHeaderWidth = textWidth + gap + rectWidth;
-      
-      // Ponto inicial X para que todo o conjunto fique perfeitamente centralizado no canvas
       const startX = (CANVAS_WIDTH - totalHeaderWidth) / 2;
       const textY = 27;
 
-      // Desenhar o Texto do Título
       ctx.shadowColor = '#f3b002';
       ctx.shadowBlur = 0;
       ctx.shadowOffsetX = 2;
@@ -416,37 +458,31 @@
       ctx.fillText(titleText, startX, textY);
       ctx.restore();
 
-      // 3. Faixa Vermelha
       const rectX = startX + textWidth + gap;
       const rectY = textY - (rectHeight / 1.7);
 
       ctx.fillStyle = '#e74c3c';
       ctx.fillRect(rectX, rectY, rectWidth, rectHeight);
 
-      // Texto do Ano (Dígitos centralizados)
       ctx.fillStyle = '#ffffff';
       ctx.font = '700 11px "Roboto", sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(state.year || '0000', rectX + (rectWidth / 2), rectY + (rectHeight / 2) + 1);
 
-      // 4. Renderizar os Slots (Centralizados)
       SLOTS_CONFIG.forEach((cfg, i) => {
         const slot = state.slots[i];
 
-        // Anel Externo
         ctx.beginPath();
         ctx.arc(cfg.circleX, cfg.circleY, cfg.radius + 9, 0, Math.PI * 2);
         ctx.fillStyle = '#f3b002';
         ctx.fill();
 
-        // Anel Intermediário
         ctx.beginPath();
         ctx.arc(cfg.circleX, cfg.circleY, cfg.radius + 3, 0, Math.PI * 2);
         ctx.fillStyle = '#ffc600';
         ctx.fill();
 
-        // Círculo Interno
         ctx.save();
         ctx.beginPath();
         ctx.arc(cfg.circleX, cfg.circleY, cfg.radius, 0, Math.PI * 2);
@@ -469,10 +505,8 @@
         }
         ctx.restore();
 
-        // Coração
         drawHeart(ctx, cfg.heartX, cfg.heartY - 2, 6);
 
-        // Texto do Número de Votos
         ctx.save();
         ctx.shadowColor = '#f3b002';
         ctx.shadowBlur = 0;
@@ -500,34 +534,6 @@
       ctx.restore();
     }
 
-    function saveStateToLocalStorage() {
-      localStorage.setItem('anime_rank_state', JSON.stringify(state));
-    }
-
-    function loadStateFromLocalStorage() {
-      const saved = localStorage.getItem('anime_rank_state');
-      if (saved) {
-        try {
-          state = JSON.parse(saved);
-          yearInput.value = state.year || '0000';
-          
-          let pendingLoads = state.slots.length;
-          state.slots.forEach((slot, i) => {
-            if (slot.imageSrc) {
-              loadImageForSlot(i, slot.imageSrc, () => {
-                pendingLoads--;
-                if (pendingLoads === 0) drawCanvas();
-              });
-            } else {
-              pendingLoads--;
-            }
-          });
-        } catch (e) {
-          console.error('Erro ao carregar dados salvos', e);
-        }
-      }
-    }
-
     function downloadCanvasImage() {
       const link = document.createElement('a');
       link.download = `anime-rank-${state.year || 'editado'}.png`;
@@ -542,13 +548,8 @@
     }
 
     function resetAll() {
-      localStorage.removeItem('anime_rank_state');
       state = JSON.parse(JSON.stringify(defaultState));
-      yearInput.value = state.year;
-      loadedImages.fill(null);
-      
-      renderControlsUI();
-      drawCanvas();
+      saveStateToFirebase();
       document.getElementById('resetModal').style.display = 'none';
     }
   </script>
